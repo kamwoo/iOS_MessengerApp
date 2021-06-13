@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class LoginViewController: UIViewController {
     
@@ -73,7 +74,7 @@ class LoginViewController: UIViewController {
                                                                  style: .done, // 텝이 떼어질 때
                                                                  target: self,
                                                                  action: #selector(didTapRegister))
-        self.loginButton.addTarget(self, action: #selector(alertUserLoginError), for: .touchUpInside)
+        self.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         
         emailField.delegate = self
         passwordField.delegate = self
@@ -125,6 +126,18 @@ class LoginViewController: UIViewController {
             alertUserLoginError()
             return
         }
+        
+        FirebaseAuth.Auth.auth().signIn(withEmail: email,
+                                        password: password,
+                                        completion: { authResult, error in
+                                            guard let result = authResult, error == nil else {
+                                                print("fail login")
+                                                return
+                                            }
+                                            
+                                            let user = result.user
+                                            print("Logged in user \(user)")
+                                        })
     }
     
     @objc func alertUserLoginError() {

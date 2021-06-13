@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class RegisterViewController: UIViewController {
     
@@ -108,7 +109,7 @@ class RegisterViewController: UIViewController {
                                                                  style: .done, // 텝이 떼어질 때
                                                                  target: self,
                                                                  action: #selector(didTapRegister))
-        self.registerButton.addTarget(self, action: #selector(alertUserLoginError), for: .touchUpInside)
+        self.registerButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
         
         emailField.delegate = self
         passwordField.delegate = self
@@ -191,9 +192,22 @@ class RegisterViewController: UIViewController {
               !email.isEmpty,
               !password.isEmpty,
               password.count >= 6 else {
+            print("password error")
             alertUserLoginError()
             return
         }
+        
+        // Firebase login
+        FirebaseAuth.Auth.auth().createUser(withEmail: email,
+                                            password: password,
+                                            completion: {authResult, error in
+                                                guard let result = authResult, error == nil else {
+                                                    print("auth error")
+                                                    return
+                                                }
+                                                let user = result.user
+                                                print("Creatd User : \(user)")
+                                            })
     }
     
     @objc func alertUserLoginError() {
@@ -204,6 +218,7 @@ class RegisterViewController: UIViewController {
         
         present(alert, animated: true, completion: nil)
     }
+    
     
     @objc private func didTapRegister() {
         let vc = RegisterViewController()
