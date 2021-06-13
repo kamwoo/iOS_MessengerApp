@@ -20,6 +20,9 @@ class RegisterViewController: UIViewController {
         imageView.image = UIImage(systemName: "person")
         imageView.tintColor = .gray
         imageView.contentMode = .scaleAspectFit
+        imageView.layer.masksToBounds = true
+        imageView.layer.borderWidth = 2
+        imageView.layer.borderColor = UIColor.lightGray.cgColor
         return imageView
     }()
     
@@ -119,13 +122,14 @@ class RegisterViewController: UIViewController {
         scrollView.addSubview(registerButton)
         
         imageView.isUserInteractionEnabled = true
-//        scrollView.isUserInteractionEnabled = true
+        scrollView.isUserInteractionEnabled = true
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapChangeProfileImage))
         imageView.addGestureRecognizer(gesture)
     }
     
     @objc private func didTapChangeProfileImage() {
         print("RegisterViewController - didTapChangeProfileImage() called")
+        presentPhotoActionSheet()
     }
     
     // 레이아웃이 결정되고 나서 수행
@@ -141,6 +145,8 @@ class RegisterViewController: UIViewController {
                                  y: 20,
                                  width: size,
                                  height: size)
+        imageView.layer.cornerRadius = imageView.width / 2
+        
         firstNameField.frame = CGRect(x: 30,
                                   y: imageView.bottom + 10,
                                   width: scrollView.width - 60,
@@ -220,5 +226,62 @@ extension RegisterViewController : UITextFieldDelegate {
             registerButtonTapped()
         }
         return true
+    }
+}
+
+extension RegisterViewController : UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    func presentPhotoActionSheet() {
+        let actionSheet = UIAlertController(title: "Profile Picture",
+                                            message: "사진을 선택해주세요",
+                                            preferredStyle: .actionSheet)
+        // 취소 버튼
+        actionSheet.addAction(UIAlertAction(title: "취소",
+                                            style: .cancel,
+                                            handler: nil))
+        // 사진 찍기
+        actionSheet.addAction(UIAlertAction(title: "사진찍기",
+                                            style: .default,
+                                            handler: { [weak self]_ in
+                                                guard let self = self else {return}
+                                                self.presentCamera()
+                                            }))
+        // 사진 선택
+        actionSheet.addAction(UIAlertAction(title: "사진선택",
+                                            style: .default,
+                                            handler: { [weak self] _ in
+                                                guard let self = self else {return}
+                                                self.presentImagePicker()
+                                            }))
+        
+        present(actionSheet, animated: true)
+    }
+    
+    func presentCamera() {
+        let vc = UIImagePickerController()
+        vc.sourceType = .camera
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true, completion: nil)
+    }
+    
+    func presentImagePicker() {
+        let vc = UIImagePickerController()
+        vc.sourceType = .photoLibrary
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true, completion: nil)
+    }
+    
+    // 이미지가 선택되고 난 뒤
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        guard let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage else {return}
+        self.imageView.image = selectedImage
+    }
+    
+    // 완료되고 종료될때
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
     }
 }
