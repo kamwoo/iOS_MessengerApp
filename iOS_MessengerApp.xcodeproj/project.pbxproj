@@ -13,6 +13,7 @@
 		F6A3CECA26760E04008C7A43 /* VideoPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CEC926760E04008C7A43 /* VideoPlayerViewController.swift */; };
 		F6A3CECC26760E3C008C7A43 /* NewConversationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CECB26760E3C008C7A43 /* NewConversationViewController.swift */; };
 		F6A3CECE26760E55008C7A43 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CECD26760E55008C7A43 /* ProfileViewController.swift */; };
+		F6A3CED1267616AA008C7A43 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CED0267616AA008C7A43 /* Extensions.swift */; };
 		F6A54E582675DBC30011A782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A54E572675DBC30011A782 /* AppDelegate.swift */; };
 		F6A54E5A2675DBC30011A782 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A54E592675DBC30011A782 /* SceneDelegate.swift */; };
 		F6A54E5C2675DBC30011A782 /* ConversationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A54E5B2675DBC30011A782 /* ConversationsViewController.swift */; };
@@ -28,6 +29,7 @@
 		F6A3CEC926760E04008C7A43 /* VideoPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewController.swift; sourceTree = "<group>"; };
 		F6A3CECB26760E3C008C7A43 /* NewConversationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationViewController.swift; sourceTree = "<group>"; };
 		F6A3CECD26760E55008C7A43 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		F6A3CED0267616AA008C7A43 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		F6A54E542675DBC30011A782 /* iOS_MessengerApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS_MessengerApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6A54E572675DBC30011A782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F6A54E592675DBC30011A782 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -54,6 +56,7 @@
 			children = (
 				F6A54E572675DBC30011A782 /* AppDelegate.swift */,
 				F6A54E592675DBC30011A782 /* SceneDelegate.swift */,
+				F6A3CED0267616AA008C7A43 /* Extensions.swift */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -62,8 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				F6A54E5B2675DBC30011A782 /* ConversationsViewController.swift */,
-				F6A3CEC326760DBB008C7A43 /* LoginViewController.swift */,
-				F6A3CEC526760DCC008C7A43 /* RegisterViewController.swift */,
+				F6A3CECF26760F48008C7A43 /* Login */,
 				F6A3CEC726760DF6008C7A43 /* PhotoViewerViewController.swift */,
 				F6A3CEC926760E04008C7A43 /* VideoPlayerViewController.swift */,
 				F6A3CECB26760E3C008C7A43 /* NewConversationViewController.swift */,
@@ -102,6 +104,15 @@
 				F6A54E622675DBC40011A782 /* LaunchScreen.storyboard */,
 			);
 			path = Storyboards;
+			sourceTree = "<group>";
+		};
+		F6A3CECF26760F48008C7A43 /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				F6A3CEC326760DBB008C7A43 /* LoginViewController.swift */,
+				F6A3CEC526760DCC008C7A43 /* RegisterViewController.swift */,
+			);
+			path = Login;
 			sourceTree = "<group>";
 		};
 		F6A54E4B2675DBC30011A782 = {
@@ -208,6 +219,7 @@
 				F6A3CECC26760E3C008C7A43 /* NewConversationViewController.swift in Sources */,
 				F6A54E5C2675DBC30011A782 /* ConversationsViewController.swift in Sources */,
 				F6A3CECA26760E04008C7A43 /* VideoPlayerViewController.swift in Sources */,
+				F6A3CED1267616AA008C7A43 /* Extensions.swift in Sources */,
 				F6A54E582675DBC30011A782 /* AppDelegate.swift in Sources */,
 				F6A3CECE26760E55008C7A43 /* ProfileViewController.swift in Sources */,
 				F6A54E5A2675DBC30011A782 /* SceneDelegate.swift in Sources */,
