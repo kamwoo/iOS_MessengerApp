@@ -8,8 +8,11 @@
 import UIKit
 import FirebaseAuth
 import FBSDKLoginKit
+import JGProgressHUD
 
 class LoginViewController: UIViewController {
+    
+    private let spinner = JGProgressHUD(style: .dark)
     
     private let scrollView : UIScrollView = {
         let scrollView = UIScrollView()
@@ -17,6 +20,7 @@ class LoginViewController: UIViewController {
         return scrollView
     }()
     
+    // 로고이미지
     private let imageView : UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "logo")
@@ -24,6 +28,7 @@ class LoginViewController: UIViewController {
         return imageView
     }()
     
+    // 이메일 입력 필드
     private let emailField : UITextField = {
         let textfield = UITextField()
         textfield.autocapitalizationType = .none
@@ -33,12 +38,13 @@ class LoginViewController: UIViewController {
         textfield.layer.borderWidth = 1
         textfield.layer.borderColor = UIColor.lightGray.cgColor
         textfield.placeholder = "Write your email"
-        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
         textfield.backgroundColor = .white
         return textfield
     }()
     
+    // 비밀번호 입력 필드
     private let passwordField : UITextField = {
         let textfield = UITextField()
         textfield.autocapitalizationType = .none
@@ -48,13 +54,14 @@ class LoginViewController: UIViewController {
         textfield.layer.borderWidth = 1
         textfield.layer.borderColor = UIColor.lightGray.cgColor
         textfield.placeholder = "Write your password"
-        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
         textfield.backgroundColor = .white
         textfield.isSecureTextEntry = true
         return textfield
     }()
     
+    // 로그인 버튼
     private let loginButton : UIButton = {
         let button = UIButton()
         button.setTitle("LogIn", for: .normal)
@@ -66,6 +73,7 @@ class LoginViewController: UIViewController {
         return button
     }()
     
+    // 페이스북 로그인 버튼
     private let faceBookLoginButton : FBLoginButton = {
        let button = FBLoginButton()
         // 페이스북 정보 필드 권한
@@ -78,10 +86,13 @@ class LoginViewController: UIViewController {
         self.title = "Login"
         view.backgroundColor = .white
         
+        // 오른쪽 탭바 버튼 -> 가입화면
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register",
                                                                  style: .done,
                                                                  target: self,
                                                                  action: #selector(didTapRegister))
+        
+        // 로그인 버튼 액션 추가
         self.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         
         emailField.delegate = self
@@ -132,6 +143,8 @@ class LoginViewController: UIViewController {
         
     }
     
+    
+    // 로그임 버튼 클릭 함수
     @objc private func loginButtonTapped() {
         // 이메일 필드, 비밀번호 필드 포커스 해제
         emailField.resignFirstResponder()
@@ -143,17 +156,23 @@ class LoginViewController: UIViewController {
             return
         }
         
+        spinner.show(in: view)
+        
         // 이메일, 비밀번호로 로그인
         FirebaseAuth.Auth.auth().signIn(withEmail: email,
                                         password: password,
                                         completion: { [weak self] authResult, error in
                                             guard let self = self else {return}
                                             
+                                            DispatchQueue.main.async {
+                                                self.spinner.dismiss()
+                                            }
+                                            // 로그인 실패
                                             guard let result = authResult, error == nil else {
                                                 print("fail login")
                                                 return
                                             }
-                                            
+                                            // 로그인 성공
                                             let user = result.user
                                             print("Logged in user \(user)")
                                             self.navigationController?.dismiss(animated: true, completion: nil)
@@ -171,7 +190,7 @@ class LoginViewController: UIViewController {
     }
     
     
-    // 상단 탬에 등록 버튼이 클릭되었을 때
+    // 상단 탭에 등록 버튼이 클릭되었을 때
     @objc private func didTapRegister() {
         let vc = RegisterViewController()
         vc.title = "Create Account"
@@ -183,7 +202,7 @@ class LoginViewController: UIViewController {
 
 
 extension LoginViewController : UITextFieldDelegate {
-    
+    // 입력완료 버튼 설정
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 
         // emailfeild에서 return 키를 누르면 password field에 포커싱이 잡힌다.
@@ -219,14 +238,14 @@ extension LoginViewController : LoginButtonDelegate {
                                                          version: nil,
                                                          httpMethod: .get)
         
-        // 이용자 정보 request
+        // 이용자 정보 request후 response 수신
         facebookRequest.start{ _, result, error in
             guard let result = result as? [String: Any], error == nil else {
                 print("fail to make facebook graph request")
                 return
             }
             
-            // request의 response로 받은 데이터 언래팡
+            // response의 받은 데이터 언래핑
             print("\(result)")
             guard let userName = result["name"] as? String,
                   let email = result["email"] as? String else {
@@ -245,9 +264,9 @@ extension LoginViewController : LoginButtonDelegate {
                 }
             })
             
-            // 페이스북으로 로그인한 사용자의 credential로 로그인
+            // 페이스북으로 사용자가 로그인후 받은 토큰으로 credential 생성
             let credential = FacebookAuthProvider.credential(withAccessToken: token)
-            
+            // 생성된 credential로 firebase 로그인
             FirebaseAuth.Auth.auth().signIn(with: credential){ [weak self] authResult, error in
                 guard let self = self else {return }
                 
@@ -263,8 +282,6 @@ extension LoginViewController : LoginButtonDelegate {
             }
             
         }
-        
-        
         
     }
     

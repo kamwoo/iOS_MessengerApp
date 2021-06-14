@@ -14,6 +14,7 @@ class ProfileViewController: UIViewController {
     
     @IBOutlet var tableView : UITableView!
     
+    // 테이블 뷰 셀 데이터 어레이
     let data = ["Log Out"]
 
     override func viewDidLoad() {

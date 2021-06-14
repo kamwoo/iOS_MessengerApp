@@ -7,15 +7,20 @@
 
 import UIKit
 import FirebaseAuth
+import JGProgressHUD
 
 class RegisterViewController: UIViewController {
     
+    private let spinner = JGProgressHUD(style: .dark)
+    
+    // MARK: - views
     private let scrollView : UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.clipsToBounds = true
         return scrollView
     }()
     
+    // 프로필 이미지
     private let imageView : UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "person.circle")
@@ -27,6 +32,7 @@ class RegisterViewController: UIViewController {
         return imageView
     }()
     
+    // 이메일 필드
     private let emailField : UITextField = {
         let textfield = UITextField()
         textfield.autocapitalizationType = .none
@@ -36,12 +42,13 @@ class RegisterViewController: UIViewController {
         textfield.layer.borderWidth = 1
         textfield.layer.borderColor = UIColor.lightGray.cgColor
         textfield.placeholder = "Write your email"
-        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
         textfield.backgroundColor = .white
         return textfield
     }()
     
+    // 성 필드
     private let firstNameField : UITextField = {
         let textfield = UITextField()
         textfield.autocapitalizationType = .none
@@ -51,12 +58,13 @@ class RegisterViewController: UIViewController {
         textfield.layer.borderWidth = 1
         textfield.layer.borderColor = UIColor.lightGray.cgColor
         textfield.placeholder = "Write your first name"
-        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
         textfield.backgroundColor = .white
         return textfield
     }()
     
+    // 이름 필드
     private let secondNameField : UITextField = {
         let textfield = UITextField()
         textfield.autocapitalizationType = .none
@@ -66,12 +74,13 @@ class RegisterViewController: UIViewController {
         textfield.layer.borderWidth = 1
         textfield.layer.borderColor = UIColor.lightGray.cgColor
         textfield.placeholder = "Write your second name"
-        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
         textfield.backgroundColor = .white
         return textfield
     }()
     
+    // 비밀번호 필드
     private let passwordField : UITextField = {
         let textfield = UITextField()
         textfield.autocapitalizationType = .none
@@ -81,14 +90,14 @@ class RegisterViewController: UIViewController {
         textfield.layer.borderWidth = 1
         textfield.layer.borderColor = UIColor.lightGray.cgColor
         textfield.placeholder = "Write your password"
-        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
         textfield.backgroundColor = .white
         textfield.isSecureTextEntry = true
         return textfield
     }()
     
-    
+    // 등록 버튼
     private let registerButton : UIButton = {
         let button = UIButton()
         button.setTitle("Register", for: .normal)
@@ -100,6 +109,8 @@ class RegisterViewController: UIViewController {
         return button
     }()
     
+    
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Login"
@@ -125,12 +136,6 @@ class RegisterViewController: UIViewController {
         // 이미지 클릭이 되었을 때
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapChangeProfileImage))
         imageView.addGestureRecognizer(gesture)
-    }
-    
-    // 이미지가 클리되고 actionSheet 실행
-    @objc private func didTapChangeProfileImage() {
-        print("RegisterViewController - didTapChangeProfileImage() called")
-        presentPhotoActionSheet()
     }
     
     // 레이아웃이 결정되고 나서 수행
@@ -175,6 +180,17 @@ class RegisterViewController: UIViewController {
         
     }
     
+    
+    // MARK: -Button Actions
+    
+    // 이미지가 클릭되고 actionSheet 실행
+    @objc private func didTapChangeProfileImage() {
+        print("RegisterViewController - didTapChangeProfileImage() called")
+        presentPhotoActionSheet()
+    }
+    
+    
+    
     // 등록 버튼이 클리되었을 때
     @objc private func registerButtonTapped() {
         
@@ -194,14 +210,20 @@ class RegisterViewController: UIViewController {
               !email.isEmpty,
               !password.isEmpty,
               password.count >= 6 else {
-            print("password error")
-            alertUserLoginError()
-            return
+                    print("password error")
+                    alertUserLoginError()
+                    return
         }
+        
+        spinner.show(in: view)
         
         // 이전에 등록된 사용자가 있는지 확인
         DatabaseManager.shared.userExists(with: email){ [weak self] exist in
             guard let self = self else {return}
+            
+            DispatchQueue.main.async {
+                self.spinner.dismiss()
+            }
             
             guard exist == true else {
                 // user already exist
@@ -224,6 +246,7 @@ class RegisterViewController: UIViewController {
                                                         secondName: secondName,
                                                         emailAddress: email))
                                                     
+                                                    // RegisterView 종료
                                                     self.navigationController?.dismiss(animated: true, completion: nil)
                                                 })
             
@@ -246,6 +269,7 @@ class RegisterViewController: UIViewController {
 }
 
 
+// 입력이 완료 버튼 설정
 extension RegisterViewController : UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
