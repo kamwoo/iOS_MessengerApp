@@ -18,7 +18,7 @@ class RegisterViewController: UIViewController {
     
     private let imageView : UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "person")
+        imageView.image = UIImage(systemName: "person.circle")
         imageView.tintColor = .gray
         imageView.contentMode = .scaleAspectFit
         imageView.layer.masksToBounds = true
@@ -105,10 +105,6 @@ class RegisterViewController: UIViewController {
         self.title = "Login"
         view.backgroundColor = .white
         
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register",
-                                                                 style: .done, // 텝이 떼어질 때
-                                                                 target: self,
-                                                                 action: #selector(didTapRegister))
         self.registerButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
         
         emailField.delegate = self
@@ -122,12 +118,16 @@ class RegisterViewController: UIViewController {
         scrollView.addSubview(passwordField)
         scrollView.addSubview(registerButton)
         
+        // 이미지 클릭을 허용
         imageView.isUserInteractionEnabled = true
         scrollView.isUserInteractionEnabled = true
+        
+        // 이미지 클릭이 되었을 때
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapChangeProfileImage))
         imageView.addGestureRecognizer(gesture)
     }
     
+    // 이미지가 클리되고 actionSheet 실행
     @objc private func didTapChangeProfileImage() {
         print("RegisterViewController - didTapChangeProfileImage() called")
         presentPhotoActionSheet()
@@ -175,14 +175,16 @@ class RegisterViewController: UIViewController {
         
     }
     
+    // 등록 버튼이 클리되었을 때
     @objc private func registerButtonTapped() {
         
+        // 포커싱 해제
         emailField.resignFirstResponder()
         passwordField.resignFirstResponder()
         firstNameField.resignFirstResponder()
         secondNameField.resignFirstResponder()
         
-        
+        // 각 텍스트 필드 평가 및 데이터 저장
         guard let firstName = firstNameField.text,
               let secondName = secondNameField.text,
               let email = emailField.text,
@@ -197,33 +199,47 @@ class RegisterViewController: UIViewController {
             return
         }
         
-        // Firebase login
-        FirebaseAuth.Auth.auth().createUser(withEmail: email,
-                                            password: password,
-                                            completion: {authResult, error in
-                                                guard let result = authResult, error == nil else {
-                                                    print("auth error")
-                                                    return
-                                                }
-                                                let user = result.user
-                                                print("Creatd User : \(user)")
-                                            })
+        // 이전에 등록된 사용자가 있는지 확인
+        DatabaseManager.shared.userExists(with: email){ [weak self] exist in
+            guard let self = self else {return}
+            
+            guard exist == true else {
+                // user already exist
+                self.alertUserLoginError(message: "이미 존재하는 사용자입니다.")
+                return
+            }
+            
+            // Firebase Authentication에 등록
+            FirebaseAuth.Auth.auth().createUser(withEmail: email,
+                                                password: password,
+                                                completion: { authResult, error in
+                                                    
+                                                    guard authResult != nil, error == nil else {
+                                                        print("auth error")
+                                                        return
+                                                    }
+                                                    // realtiem database에 저장
+                                                    DatabaseManager.shared.insertUser(with: ChatAppUser(
+                                                        firstName: firstName,
+                                                        secondName: secondName,
+                                                        emailAddress: email))
+                                                    
+                                                    self.navigationController?.dismiss(animated: true, completion: nil)
+                                                })
+            
+        }
+        
+        
     }
     
-    @objc func alertUserLoginError() {
+    // 등록 실패 알림
+    @objc func alertUserLoginError(message : String = "다시 입력해주세요" ) {
         let alert = UIAlertController(title: "등록에 실패했습니다.",
-                                      message: "다시 입력해주세요",
+                                      message: message,
                                       preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .cancel, handler: nil))
         
         present(alert, animated: true, completion: nil)
-    }
-    
-    
-    @objc private func didTapRegister() {
-        let vc = RegisterViewController()
-        vc.title = "Create Account"
-        navigationController?.pushViewController(vc, animated: true)
     }
     
     
@@ -244,6 +260,7 @@ extension RegisterViewController : UITextFieldDelegate {
     }
 }
 
+// 이미지 정보 등록 Delegate
 extension RegisterViewController : UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     func presentPhotoActionSheet() {
@@ -272,6 +289,7 @@ extension RegisterViewController : UIImagePickerControllerDelegate, UINavigation
         present(actionSheet, animated: true)
     }
     
+    // 사진 촬영이 선택되었을 때 실행
     func presentCamera() {
         let vc = UIImagePickerController()
         vc.sourceType = .camera
@@ -280,6 +298,7 @@ extension RegisterViewController : UIImagePickerControllerDelegate, UINavigation
         present(vc, animated: true, completion: nil)
     }
     
+    // 사진첩 선택 뷰 전환
     func presentImagePicker() {
         let vc = UIImagePickerController()
         vc.sourceType = .photoLibrary

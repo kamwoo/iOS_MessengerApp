@@ -21,6 +21,7 @@
 		F6A54E5F2675DBC30011A782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6A54E5D2675DBC30011A782 /* Main.storyboard */; };
 		F6A54E612675DBC40011A782 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F6A54E602675DBC40011A782 /* Assets.xcassets */; };
 		F6A54E642675DBC40011A782 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6A54E622675DBC40011A782 /* LaunchScreen.storyboard */; };
+		F6C3503F267707420010601C /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C3503E267707420010601C /* DatabaseManager.swift */; };
 		F8B33AF271333FB81BA59370 /* Pods_iOS_MessengerApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6283DB0AE0B1E4A1891CE879 /* Pods_iOS_MessengerApp.framework */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +45,7 @@
 		F6A54E602675DBC40011A782 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F6A54E632675DBC40011A782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F6A54E652675DBC40011A782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F6C3503E267707420010601C /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +83,7 @@
 				F6A54E572675DBC30011A782 /* AppDelegate.swift */,
 				F6A54E592675DBC30011A782 /* SceneDelegate.swift */,
 				F6A3CED0267616AA008C7A43 /* Extensions.swift */,
+				F6C3503E267707420010601C /* DatabaseManager.swift */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -287,6 +290,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6A3CEC426760DBB008C7A43 /* LoginViewController.swift in Sources */,
+				F6C3503F267707420010601C /* DatabaseManager.swift in Sources */,
 				F6A3CEC626760DCC008C7A43 /* RegisterViewController.swift in Sources */,
 				F6A3CECC26760E3C008C7A43 /* NewConversationViewController.swift in Sources */,
 				F6A54E5C2675DBC30011A782 /* ConversationsViewController.swift in Sources */,
