@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import FBSDKLoginKit
 
 // 프로필 화면 
 
@@ -57,6 +58,10 @@ extension ProfileViewController : UITableViewDelegate,UITableViewDataSource {
                                       style: .destructive,
                                       handler: { [weak self] _ in
                                         guard let self = self else {return}
+                                        
+                                        // 페이스북 로그아웃
+                                        FBSDKLoginKit.LoginManager().logOut()
+                                        
                                         // Firebase auth를 이용하여 로그아웃
                                         do {
                                             try FirebaseAuth.Auth.auth().signOut()

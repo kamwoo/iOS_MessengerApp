@@ -225,30 +225,50 @@ class RegisterViewController: UIViewController {
                 self.spinner.dismiss()
             }
             
-            guard exist == true else {
+            // 값이 true면 유저가 있으므로 경고창 실행
+            guard !exist else {
                 // user already exist
                 self.alertUserLoginError(message: "이미 존재하는 사용자입니다.")
                 return
             }
             
             // Firebase Authentication에 등록
-            FirebaseAuth.Auth.auth().createUser(withEmail: email,
-                                                password: password,
-                                                completion: { authResult, error in
+            FirebaseAuth.Auth.auth().createUser(withEmail: email,password: password, completion: { authResult, error in
                                                     
-                                                    guard authResult != nil, error == nil else {
-                                                        print("auth error")
-                                                        return
-                                                    }
-                                                    // realtiem database에 저장
-                                                    DatabaseManager.shared.insertUser(with: ChatAppUser(
-                                                        firstName: firstName,
-                                                        secondName: secondName,
-                                                        emailAddress: email))
-                                                    
-                                                    // RegisterView 종료
-                                                    self.navigationController?.dismiss(animated: true, completion: nil)
-                                                })
+                guard authResult != nil, error == nil else {
+                    print("RegisterViewController - createUser() auth error")
+                    return
+                }
+                
+                // 가입 유저 정보
+                let chatUser = ChatAppUser(firstName: firstName,
+                                           secondName: secondName,
+                                           emailAddress: email)
+                // realtiem database에 저장
+                DatabaseManager.shared.insertUser(with: chatUser, completion: { success in
+                    if success {
+                        //upload image
+                        guard let image = self.imageView.image,
+                              let data = image.pngData() else {
+                            return
+                        }
+                        
+                        let fileName = chatUser.profilePictureFileName
+                        StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName, completion: { result in
+                            switch result {
+                            case .success(let downloadUrl):
+                                UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+                                print(downloadUrl)
+                            case .failure(let error):
+                                print("Storage manager error :\(error)")
+                            }
+                        })
+                    }
+                })
+                
+                // RegisterView 종료
+                self.navigationController?.dismiss(animated: true, completion: nil)
+            })
             
         }
         

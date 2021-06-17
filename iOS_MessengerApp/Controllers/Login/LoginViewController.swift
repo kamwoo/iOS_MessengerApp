@@ -233,7 +233,7 @@ extension LoginViewController : LoginButtonDelegate {
         
         // 페이스북으로 로그인한 이용자 정보 reqeust할 세부정보 작성
         let facebookRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
-                                                         parameters: ["fields":"email, name"],
+                                                         parameters: ["fields":"email, name, picture.type(large)"],
                                                          tokenString: token,
                                                          version: nil,
                                                          httpMethod: .get)
@@ -246,21 +246,53 @@ extension LoginViewController : LoginButtonDelegate {
             }
             
             // response의 받은 데이터 언래핑
-            print("\(result)")
             guard let userName = result["name"] as? String,
-                  let email = result["email"] as? String else {
+                  let email = result["email"] as? String,
+                  let picture = result["picture"] as? [String : Any],
+                  let data = picture["data"] as? [String : Any],
+                  let pictureUrl = data["url"] as? String
+                else {
                 print("Get user name and email fail")
                 return
             }
-            let firstName = userName
             
             // 페이스북 계정의 이메일과 일치하는 유저가 있는지 확인
             DatabaseManager.shared.userExists(with: email, completion: { exist in
                 if exist == false{
+                    let chatUser = ChatAppUser( firstName: userName,
+                                                secondName: "",
+                                                emailAddress: email
+                                                )
                     // 이전에 등록된 동일한 이메일이 없다면 등록
-                    DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName,
-                                                                        secondName: "",
-                                                                        emailAddress: email))
+                    DatabaseManager.shared.insertUser(with: chatUser, completion: { success in
+                            if success {
+                                guard let url = URL(string: pictureUrl) else { return }
+                                print("LoginViewController - success download facebook userdata")
+                                
+                                // 프로필이미지 url request
+                                let dataTask = URLSession.shared.dataTask(with: url){ data, status, error in
+                                    do{
+                                        guard let data = data else {
+                                            print("LoginViewController - failed facebook insertUser \(String(describing: error))")
+                                            return
+                                        }
+                                        print("LoginViewController - success facebook insertUser")
+                                        //upload image
+                                        let fileName = chatUser.profilePictureFileName
+                                        StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName, completion: { result in
+                                            switch result {
+                                            case .success(let downloadUrl):
+                                                UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+                                                print(downloadUrl)
+                                            case .failure(let error):
+                                                print("Storage manager error :\(error)")
+                                            }
+                                        })
+                                    }
+                                }
+                                dataTask.resume()
+                            }
+                    })
                 }
             })
             
