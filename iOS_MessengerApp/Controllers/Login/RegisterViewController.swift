@@ -254,15 +254,17 @@ class RegisterViewController: UIViewController {
                         }
                         
                         let fileName = chatUser.profilePictureFileName
+                        // 저장소에 프로필 이미지를 저장
                         StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName, completion: { result in
                             switch result {
                             case .success(let downloadUrl):
+                                // 유저의 이메일을 전역으로 설정
                                 UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
                                 print(downloadUrl)
                             case .failure(let error):
                                 print("Storage manager error :\(error)")
                             }
-                        })
+                        }) 
                     }
                 })
                 

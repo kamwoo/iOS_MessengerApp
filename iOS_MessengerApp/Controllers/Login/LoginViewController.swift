@@ -174,6 +174,9 @@ class LoginViewController: UIViewController {
                                             }
                                             // 로그인 성공
                                             let user = result.user
+                                            
+                                            UserDefaults.standard.set(email, forKey: "email")
+                                            
                                             print("Logged in user \(user)")
                                             self.navigationController?.dismiss(animated: true, completion: nil)
                                         })
@@ -256,6 +259,9 @@ extension LoginViewController : LoginButtonDelegate {
                 return
             }
             
+            // 유저의 이메일을 전역 디폴트로 설정
+            UserDefaults.standard.set(email, forKey: "email")
+            
             // 페이스북 계정의 이메일과 일치하는 유저가 있는지 확인
             DatabaseManager.shared.userExists(with: email, completion: { exist in
                 if exist == false{
@@ -271,26 +277,27 @@ extension LoginViewController : LoginButtonDelegate {
                                 
                                 // 프로필이미지 url request
                                 let dataTask = URLSession.shared.dataTask(with: url){ data, status, error in
-                                    do{
-                                        guard let data = data else {
-                                            print("LoginViewController - failed facebook insertUser \(String(describing: error))")
-                                            return
-                                        }
-                                        print("LoginViewController - success facebook insertUser")
-                                        //upload image
-                                        let fileName = chatUser.profilePictureFileName
-                                        StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName, completion: { result in
-                                            switch result {
-                                            case .success(let downloadUrl):
-                                                UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
-                                                print(downloadUrl)
-                                            case .failure(let error):
-                                                print("Storage manager error :\(error)")
-                                            }
-                                        })
+                                    guard let data = data else {
+                                        print("LoginViewController - failed facebook insertUser \(String(describing: error))")
+                                        return
                                     }
+                                    
+                                    print("LoginViewController - success facebook insertUser")
+                                    
+                                    //upload image to storage
+                                    let fileName = chatUser.profilePictureFileName
+                                    StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName, completion: { result in
+                                        switch result {
+                                        case .success(let downloadUrl):
+                                            UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+                                            print(downloadUrl)
+                                        case .failure(let error):
+                                            print("Storage manager error :\(error)")
+                                        }
+                                    })
                                 }
                                 dataTask.resume()
+                                
                             }
                     })
                 }
