@@ -85,8 +85,26 @@ class ConversationsViewController: UIViewController {
     // 새로운 대화창 생성 버튼 클릭시 NewConversationViewController로 전환
     @objc private func didtapComposeButton() {
         let vc = NewConversationViewController()
+        // newConversation view가 완료되고 난 후 로직을 설정
+        vc.completion = { [weak self] result in
+            guard let self = self else {return}
+            print("\(result)")
+            self.createNewConversation(result: result)
+        }
         let navVC = UINavigationController(rootViewController: vc)
         present(navVC, animated: true, completion: nil)
+    }
+    
+    // newConversation view가 완료되고 난 뒤 채팅 뷰로 전환
+    private func createNewConversation(result : [String : String]){
+        guard let name = result["name"], let email = result["email"] else {
+            return
+        }
+        let vc = ChatViewController(with: email)
+        vc.isNewConversation = true
+        vc.title = name
+        vc.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     
@@ -113,7 +131,7 @@ extension ConversationsViewController : UITableViewDelegate, UITableViewDataSour
     // 각 셀이 선택되면 해당하는 NewConversationView으로 전환
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let vc = ChatViewController()
+        let vc = ChatViewController(with: "sdf@naver.com")
         vc.title = "Kam woo"
         vc.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(vc, animated: true)

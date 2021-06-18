@@ -113,6 +113,204 @@ extension DatabaseManager {
 
 }
 
+extension DatabaseManager {
+    /* 데이터 베이스 대화 스키마
+     
+        "asfdasdf" {
+            "message" : [
+                {
+                    "id" : String,
+                    "type" : text, photo, video,
+                    "content" : String,
+                    "date" : Date()
+                    "sender_email" : String
+                    "isRead": true/false
+                }
+            ]
+        }
+     
+        conversation => [
+            [
+                "conversation_id" : "asfdasdf"
+                "other_user_email" :
+                "latest_message" : => {
+                    "date": Date()
+                    "latest_message" : "message"
+                    "is_read": true/false
+                }
+            ]
+        ]
+     */
+    
+    // 선택된 유저와 새로운 채팅을 만들고 첫번째 메세지를 보낸다
+    public func createNewConversation(with otherUserEmail: String, firstMessage: Message, completion: @escaping (Bool) -> Void){
+        guard let currentEmail = UserDefaults.standard.value(forKey: "email") as? String else {
+            return
+        }
+        let safeEmail = DatabaseManager.safeEmail(emailAddress: currentEmail)
+        let ref = database.child("\(safeEmail)")
+        ref.observeSingleEvent(of: .value, with: { snapshot in
+            guard var userNode = snapshot.value as? [String: Any] else {
+                completion(false)
+                print("user not found")
+                return
+            }
+            
+            let messageDate = firstMessage.sentDate
+            let dateString = ChatViewController.dateFormatter.string(from: messageDate)
+            
+            var message = ""
+            
+            switch firstMessage.kind{
+            
+            case .text(let messageText):
+                message = messageText
+            case .attributedText(_):
+                break
+            case .photo(_):
+                break
+            case .video(_):
+                break
+            case .location(_):
+                break
+            case .emoji(_):
+                break
+            case .audio(_):
+                break
+            case .contact(_):
+                break
+            case .linkPreview(_):
+                break
+            case .custom(_):
+                break
+            }
+            
+            let conversationId = "conversation_\(firstMessage.messageId)"
+            
+            let newConversationData : [String: Any] = [
+                "id" : conversationId,
+                "other_user_email" : otherUserEmail,
+                "latest_message" : [
+                    "date": dateString,
+                    "message": message,
+                    "is_read": false
+                ]
+            ]
+            
+            if var conversations = userNode["conversations"] as? [[String: Any]] {
+                print("add origin conversation")
+                conversations.append(newConversationData)
+                userNode["conversations"] = conversations
+                ref.setValue(userNode){ [weak self] error, _ in
+                    guard error == nil else {
+                        completion(false)
+                        return
+                    }
+                    
+                    self?.finishCreatingConversation(conversationID: conversationId,
+                                                    firstMessage: firstMessage,
+                                                    completion: completion)
+                }
+            }else{
+                // 대화 리스트가 존재하지 않으면 생성
+                print("create new conversation")
+                userNode["conversations"] = [ newConversationData ]
+                
+                ref.setValue(userNode){ [weak self] error, _ in
+                    guard error == nil else {
+                        completion(false)
+                        return
+                    }
+                    
+                    self?.finishCreatingConversation(conversationID: conversationId,
+                                                    firstMessage: firstMessage,
+                                                    completion: completion)
+                }
+            }
+            
+        })
+    }
+    
+    /* 데이터 베이스에 대화 스키마를 따로 하나더 만드는 이유는
+        실시간으로 메세지를 관찰하고
+        대화할 때 다른 사용자를 통해 쿼리하지 않기 위해 생성
+     */
+    private func finishCreatingConversation(conversationID: String, firstMessage: Message, completion: @escaping (Bool) -> Void){
+        
+        var message = ""
+        
+        switch firstMessage.kind{
+        
+        case .text(let messageText):
+            message = messageText
+        case .attributedText(_):
+            break
+        case .photo(_):
+            break
+        case .video(_):
+            break
+        case .location(_):
+            break
+        case .emoji(_):
+            break
+        case .audio(_):
+            break
+        case .contact(_):
+            break
+        case .linkPreview(_):
+            break
+        case .custom(_):
+            break
+        }
+        
+        let messageDate = firstMessage.sentDate
+        let dateString = ChatViewController.dateFormatter.string(from: messageDate)
+        
+        guard let MyEmail = UserDefaults.standard.value(forKey: "email") as? String else {
+            completion(false)
+            return
+        }
+        
+        let currentUserEmail = DatabaseManager.safeEmail(emailAddress: MyEmail)
+        
+        let CollectionMessage : [String: Any] = [
+            "id" : firstMessage.messageId,
+            "type" : firstMessage.kind.messageKindString,
+            "content" : message,
+            "date" : dateString,
+            "sender_email" : currentUserEmail,
+            "isRead": false
+        ]
+        
+        let value : [String: Any] = [
+            "messages" : [
+                CollectionMessage
+            ]
+        ]
+        
+        database.child("\(conversationID)").setValue(value, withCompletionBlock: { error, _ in
+            guard error == nil else {
+                completion(false)
+                return
+            }
+            completion(true)
+        })
+    }
+    
+    // 해당하는 이메일로 이전에 메세지 데이터들을 요청하고 리턴 받는다.
+    public func getAllConversation(for email: String, completion: @escaping (Result<String, Error>) -> Void){
+        
+    }
+    
+    public func getAllMessageForConversation(with id: String, completion : @escaping (Result<String, Error>) -> Void){
+        
+    }
+    
+    public func sendMessage(to conversation: String, message: Message, completion: @escaping (Bool) -> Void){
+        
+    }
+}
+
 // 유저 정보 model
 struct ChatAppUser {
     let firstName : String

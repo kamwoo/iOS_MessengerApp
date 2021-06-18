@@ -11,6 +11,7 @@ import JGProgressHUD
 // 새로운 대화만들기 뷰
 
 class NewConversationViewController: UIViewController {
+    public var completion : (([String : String]) -> Void)?
     
     private let spinner = JGProgressHUD(style: .dark)
     
@@ -92,7 +93,13 @@ extension NewConversationViewController : UITableViewDelegate, UITableViewDataSo
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         // start conversation
+        let targetUserData = results[indexPath.row]
+        // 유저 선택창을 닫은 뒤 선택된 상대로 채팅뷰로 넘김
+        dismiss(animated: true){ [weak self] in
+            self?.completion?(targetUserData)
+        }
     }
+    
     
 }
 
@@ -116,6 +123,7 @@ extension NewConversationViewController : UISearchBarDelegate {
         
     }
     
+    // request가 되었다면 필터, 아니라면 유저정보 request
     func searchUsers(query: String){
         if hasFetched {
             filterUsers(with: query)
@@ -134,6 +142,7 @@ extension NewConversationViewController : UISearchBarDelegate {
         }
     }
     
+    // 전송받은 유저이름 리스트에서 유저 이름 필터
     func filterUsers(with term : String){
         guard hasFetched else {
             return
@@ -152,6 +161,7 @@ extension NewConversationViewController : UISearchBarDelegate {
        
     }
     
+    // 검색 결과의 유무에 따라 검색결과 창 결정
     func updateUI(){
         if results.isEmpty{
             print("no reault")
