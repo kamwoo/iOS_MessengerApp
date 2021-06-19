@@ -175,7 +175,26 @@ class LoginViewController: UIViewController {
                                             // 로그인 성공
                                             let user = result.user
                                             
-                                            UserDefaults.standard.set(email, forKey: "email")
+                                            let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+                                            
+                                            // 접속한 유저의 데이터 리턴
+                                            DatabaseManager.shared.getDataFor(path: safeEmail, completion: { result in
+                                                switch result{
+                                                case .success(let data):
+                                                    guard let userData = data as? [String: Any],
+                                                          let firstName = userData["first_name"] as? String,
+                                                          let secondName = userData["seconde_name"]
+                                                    else {
+                                                        return
+                                                    }
+                                                    // 접속한 유저의 이름을 전역으로 설정
+                                                    UserDefaults.standard.set("\(firstName)", forKey: "name")
+                                                case .failure(let error):
+                                                    print("failed to read data \(error)")
+                                                }
+                                            })
+                                            // 접속한 유저의 이메일을 전역으로 설정
+                                            UserDefaults.standard.set(safeEmail, forKey: "email")
                                             
                                             print("Logged in user \(user)")
                                             self.navigationController?.dismiss(animated: true, completion: nil)
@@ -259,8 +278,9 @@ extension LoginViewController : LoginButtonDelegate {
                 return
             }
             
-            // 유저의 이메일을 전역 디폴트로 설정
+            // 유저의 이메일, 이름을 전역으로 설정
             UserDefaults.standard.set(email, forKey: "email")
+            UserDefaults.standard.set("\(userName)",forKey: "name")
             
             // 페이스북 계정의 이메일과 일치하는 유저가 있는지 확인
             DatabaseManager.shared.userExists(with: email, completion: { exist in
