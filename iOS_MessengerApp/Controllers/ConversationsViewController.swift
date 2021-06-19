@@ -102,12 +102,14 @@ class ConversationsViewController: UIViewController {
     // 새로운 대화창 생성 버튼 클릭시 NewConversationViewController로 전환
     @objc private func didtapComposeButton() {
         let vc = NewConversationViewController()
+        
         // newConversation view가 완료되고 난 후 로직을 설정
         vc.completion = { [weak self] result in
             guard let self = self else {return}
             print("\(result)")
             self.createNewConversation(result: result)
         }
+        
         let navVC = UINavigationController(rootViewController: vc)
         present(navVC, animated: true, completion: nil)
     }
@@ -135,6 +137,7 @@ class ConversationsViewController: UIViewController {
             return
         }
         let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+        // 현재 유저의 저장된 대화방 데이터 쿼리
         DatabaseManager.shared.getAllConversation(for: safeEmail, completion: {[weak self] result in
             switch result {
             case .success(let conversations):

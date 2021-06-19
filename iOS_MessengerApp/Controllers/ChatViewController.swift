@@ -83,7 +83,7 @@ class ChatViewController: MessagesViewController {
     }
     
     
-    // MARK: -Lifecycle
+// MARK: - Lifecycle
     init(with email: String, id : String?) {
         self.otherUserEmail = email
         self.conversationId = id
@@ -110,6 +110,7 @@ class ChatViewController: MessagesViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         messageInputBar.inputTextView.becomeFirstResponder()
+        // 대화방 아이디가 들어오면 대화방의 메세지들을 리턴
         if let conversationId = conversationId {
             listenForMessages(id: conversationId, shouldScrollToBottom: true)
         }
@@ -117,6 +118,7 @@ class ChatViewController: MessagesViewController {
     
     // 선택된 대화방의 대화 데이터를 반환
     private func listenForMessages(id : String, shouldScrollToBottom : Bool) {
+        // 각 Message타입의 대화들의 리스트 리턴
         DatabaseManager.shared.getAllMessageForConversation(with: id, completion: { [weak self] result in
             print("listenForMessages - called()")
             switch result {
@@ -126,14 +128,16 @@ class ChatViewController: MessagesViewController {
                 }
                 self?.messages = messages
                 
+                // 대화 화면 리로딩
                 DispatchQueue.main.async {
                     self?.messagesCollectionView.reloadDataAndKeepOffset()
                     
                     if shouldScrollToBottom {
-                        self?.messagesCollectionView.scrollToBottom()
+                        self?.messagesCollectionView.scrollToLastItem()
                     }
                     
                 }
+                
             case .failure(let error):
                 print("failed to get messages \(error)")
             }
@@ -143,6 +147,7 @@ class ChatViewController: MessagesViewController {
 
 }
 
+// MARK: - new message input methods
 // 대화 입력 딜리게이트
 extension ChatViewController : InputBarAccessoryViewDelegate {
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
@@ -164,28 +169,38 @@ extension ChatViewController : InputBarAccessoryViewDelegate {
         // send Message
         if isNewConversation {
             // 새로운 대화 생성
-            DatabaseManager.shared.createNewConversation(with: otherUserEmail, name: self.title ?? "User", firstMessage: message, completion: { [weak self] success in
-                if success {
-                    print("message sent")
-                    self?.isNewConversation = false
-                }else{
-                    print("failed to send")
-                }
-            })
-        }else{
+            DatabaseManager.shared.createNewConversation(with: otherUserEmail,
+                                                         name: self.title ?? "User",
+                                                         firstMessage: message,
+                                                         completion: { [weak self] success in
+                                                                        if success {
+                                                                            print("message sent")
+                                                                            self?.isNewConversation = false
+                                                                        }else{
+                                                                            print("failed to send")
+                                                                        }
+                                                                    })
+            
+        }else{ // 이전에 대화방이 존재한다면
             guard let conversationId = conversationId, let name = self.title else {
                 return
             }
-            DatabaseManager.shared.sendMessage(to: conversationId, name: name, otherUserEmail: otherUserEmail , newMessage: message, completion: { success in
-                if success {
-                    print("message sent")
-                }else{
-                    print("failed to send")
-                }
-            })
+            // 해당하는 대화방 아이디에 새로운 메세지 추가, 각 유저의 해당하는 대화방 최근 대화 최신화
+            DatabaseManager.shared.sendMessage(to: conversationId,
+                                               name: name, // 상대방 이름
+                                               otherUserEmail: otherUserEmail ,
+                                               newMessage: message,
+                                               completion: { success in
+                                                                if success {
+                                                                    print("message sent")
+                                                                }else{
+                                                                    print("failed to send")
+                                                                }
+                                                            })
         }
         
     }
+    
     
     // 날짜, 상대유저 이메일, 보내는 사람의 이메일로 아이디 생성
     private func createMessageId() -> String? {
@@ -200,7 +215,7 @@ extension ChatViewController : InputBarAccessoryViewDelegate {
     }
 }
 
-// MARK: -MessageKit Delegates
+// MARK: - MessageKit Delegates
 extension ChatViewController : MessagesDataSource, MessagesLayoutDelegate, MessagesDisplayDelegate {
     // 메세지 보낸 사람
     func currentSender() -> SenderType {
