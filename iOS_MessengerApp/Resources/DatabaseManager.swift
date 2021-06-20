@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseDatabase
+import MessageKit
 
 final class DatabaseManager {
     static let shared = DatabaseManager()
@@ -34,7 +35,7 @@ extension DatabaseManager {
         
         database.child(safeEmail).observeSingleEvent(of: .value){ snapshot in
             // 존재하지 않음 false
-            guard (snapshot.value as? NSDictionary) != nil else {
+            guard (snapshot.value as? [String: Any]) != nil else {
                 print("DatabaseManager - userExists() user not exist")
                 completion(false)
                 return
@@ -131,7 +132,7 @@ extension DatabaseManager {
 // MARK: - Conversation Database query methods
 extension DatabaseManager {
     
-    // 대화방 로딩에 사용
+    // 대화방 리스트 로딩에 사용
     // 해당하는 이메일로 이전에 메세지들의 정보를 요청하고 리턴 받는다.
     public func getAllConversation(for email: String, completion: @escaping (Result<[Conversation], Error>) -> Void){
         // 현재 유저의 대화정보들을 리턴
@@ -141,7 +142,7 @@ extension DatabaseManager {
                 return
             }
             
-            // 리턴 받은 대화들을 맵핑하여 Conversation 오브젝트의 리스트 생성후 반환
+            // 리턴 받은 대화들을 맵핑하여 Conversation 오브젝트의 리스트로 생성후 반환
             let conversations: [Conversation] = value.compactMap({ dictionaly in
                 guard let conversationId = dictionaly["id"] as? String,
                       let name = dictionaly["name"] as? String,
@@ -188,8 +189,32 @@ extension DatabaseManager {
                     return nil
                 }
                 
+                // 메세지 종류를 판별
+                let kind: MessageKind?
+                
+                if type == "photo"{
+                    guard let url = URL(string: content), let placeholder = UIImage(systemName: "photo") else {
+                        return nil
+                    }
+                    let media = Media(url: url, image: nil, placeholderImage: placeholder, size: CGSize(width: 300, height:300))
+                    kind = .photo(media)
+                    
+                }else if type == "video"{
+                    guard let url = URL(string: content), let placeholder = UIImage(systemName: "camera") else {
+                        return nil
+                    }
+                    let media = Media(url: url, image: nil, placeholderImage: placeholder, size: CGSize(width: 300, height:300))
+                    kind = .video(media)
+            
+                }else {
+                    kind = .text(content)
+                }
+                
+                guard let finalKind = kind else { return nil }
+                
+                // 해당하는 메세지 타입으로 메세지 객체 리턴
                 let sender = Sender(photoURL: "", senderId: senderEmail, displayName: name)
-                return Message(sender: sender, messageId: messageId, sentDate: date, kind: .text(content))
+                return Message(sender: sender, messageId: messageId, sentDate: date, kind: finalKind)
             })
             
             completion(.success(messages))
@@ -456,9 +481,15 @@ extension DatabaseManager {
                 message = messageText
             case .attributedText(_):
                 break
-            case .photo(_):
+            case .photo(let mediaItem):
+                if let targetUrlString = mediaItem.url?.absoluteString {
+                    message = targetUrlString
+                }
                 break
-            case .video(_):
+            case .video(let mediaItem):
+                if let targetUrlString = mediaItem.url?.absoluteString {
+                    message = targetUrlString
+                }
                 break
             case .location(_):
                 break
@@ -593,6 +624,47 @@ extension DatabaseManager {
                 })
             }
         })
+    }
+    
+    public func deleteConversation(conversationId : String, completion: @escaping (Bool) -> Void){
+        guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
+            return
+        }
+        let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+        
+        // 현재 유저의 대화방 리스트 데이터를 가지고 온다.
+        // 그 중에서 타겟 대화방을 삭제
+        // 수정된 대화방 리스트 데이터를 업로드
+        let ref = database.child("\(safeEmail)/conversations")
+        ref.observeSingleEvent(of: .value, with: { snapshot in
+            if var conversations = snapshot.value as? [[String : Any]] {
+                var positionToRemove = 0
+                for conversation in conversations {
+                    if let id = conversation["id"] as? String, id == conversationId {
+                        break
+                    }
+                    positionToRemove += 1
+                }
+                
+                conversations.remove(at: positionToRemove)
+                ref.setValue(conversations, withCompletionBlock: {error, _ in
+                    guard error == nil else {
+                        completion(false)
+                        return
+                    }
+                    
+                    completion(true)
+                })
+            }
+        })
+    }
+    
+    public func conversationExists(with targetRecipientEmail: String, completion: @escaping (Result<String, Error>) -> Void){
+        let safeRecipientEmail = DatabaseManager.safeEmail(emailAddress: targetRecipientEmail)
+        guard let senderEmail = UserDefaults.standard.value(forKey: "email") as? String else {
+            return
+        }
+        let safeSenderEmail = DatabaseManager.safeEmail(emailAddress: senderEmail)
     }
 }
 

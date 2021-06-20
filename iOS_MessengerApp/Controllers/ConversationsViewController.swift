@@ -51,6 +51,7 @@ class ConversationsViewController: UIViewController {
         return label
     }()
     
+    private var loginObserver : NSObjectProtocol?
     
     // MARK: - LiftCycle
     override func viewDidLoad() {
@@ -65,6 +66,14 @@ class ConversationsViewController: UIViewController {
         setupTableView()
         fetchConversations()
         startListeningForConversations()
+        
+        loginObserver = NotificationCenter.default.addObserver(forName: .didLogInNotification,
+                                                               object: nil,
+                                                               queue: .main,
+                                                               using: { [weak self] _ in
+                                                                guard let self = self else {return}
+                                                                self.startListeningForConversations()
+                                                               })
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -107,7 +116,21 @@ class ConversationsViewController: UIViewController {
         vc.completion = { [weak self] result in
             guard let self = self else {return}
             print("\(result)")
-            self.createNewConversation(result: result)
+            
+            let currentConversations = self.conversations
+            
+            if let targetConversation = currentConversations.first(where: {
+                $0.otherUserEmail == DatabaseManager.safeEmail(emailAddress: result.email)
+            }){
+                let vc = ChatViewController(with: targetConversation.otherUserEmail, id: targetConversation.id)
+                vc.isNewConversation = false
+                vc.title = targetConversation.name
+                vc.navigationItem.largeTitleDisplayMode = .never
+                self.navigationController?.pushViewController(vc, animated: true)
+            }else{
+                self.createNewConversation(result: result)
+            }
+            
         }
         
         let navVC = UINavigationController(rootViewController: vc)
@@ -115,10 +138,10 @@ class ConversationsViewController: UIViewController {
     }
     
     // newConversation view가 완료되고 난 뒤 채팅 뷰로 전환
-    private func createNewConversation(result : [String : String]){
-        guard let name = result["name"], let email = result["email"] else {
-            return
-        }
+    private func createNewConversation(result : SearchResult){
+        let name = result.name
+        let email = result.email
+        
         let vc = ChatViewController(with: email, id: nil)
         vc.isNewConversation = true
         vc.title = name
@@ -137,7 +160,12 @@ class ConversationsViewController: UIViewController {
             return
         }
         let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
-        // 현재 유저의 저장된 대화방 데이터 쿼리
+        
+        if let observer = loginObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // 현재 유저의 저장된 대화방 리스트 데이터 쿼리
         DatabaseManager.shared.getAllConversation(for: safeEmail, completion: {[weak self] result in
             switch result {
             case .success(let conversations):
@@ -180,6 +208,11 @@ extension ConversationsViewController : UITableViewDelegate, UITableViewDataSour
         tableView.deselectRow(at: indexPath, animated: true)
         let model = conversations[indexPath.row]
         
+        openConversation(model)
+    }
+    
+    
+    func openConversation(_ model: Conversation) {
         // 선택된 셀의 대화 세부정보중에 대화 상대 이메일과 대화방 아이디를 넘김
         let vc = ChatViewController(with: model.otherUserEmail, id: model.id)
         vc.title = model.name // 상대방 이름
@@ -190,5 +223,30 @@ extension ConversationsViewController : UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 120
     }
+    
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        return .delete
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let conversationId = conversations[indexPath.row].id
+            tableView.beginUpdates()
+            
+            DatabaseManager.shared.deleteConversation(conversationId: conversationId , completion: {[weak self] success in
+                if success {
+                    self?.conversations.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .left)
+                }
+                
+            })
+            
+            
+            
+            tableView.endUpdates()
+        }
+    }
 }
+
+
 

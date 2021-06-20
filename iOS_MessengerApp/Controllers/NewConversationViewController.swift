@@ -11,13 +11,14 @@ import JGProgressHUD
 // 새로운 대화만들기 뷰
 
 class NewConversationViewController: UIViewController {
-    public var completion : (([String : String]) -> Void)?
+    // 
+    public var completion : ((SearchResult) -> Void)?
     
     private let spinner = JGProgressHUD(style: .dark)
     
     private var users = [[String: String]]()
     // 테이블에 표시된 어레이
-    private var results = [[String: String]]()
+    private var results = [SearchResult]()
     private var hasFetched = false
     
     // 상단 대화상대 찾기 검색바 생성
@@ -31,7 +32,7 @@ class NewConversationViewController: UIViewController {
     private let tableView : UITableView = {
        let table = UITableView()
         table.isHidden = true
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.register(NewConversationCell.self, forCellReuseIdentifier: NewConversationCell.identifier)
         return table
     }()
     
@@ -85,8 +86,9 @@ extension NewConversationViewController : UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = results[indexPath.row]["name"]
+        let model = results[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: NewConversationCell.identifier, for: indexPath) as! NewConversationCell
+        cell.configure(with: model)
         return cell
     }
     
@@ -100,6 +102,9 @@ extension NewConversationViewController : UITableViewDelegate, UITableViewDataSo
         }
     }
     
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70
+    }
     
 }
 
@@ -144,15 +149,26 @@ extension NewConversationViewController : UISearchBarDelegate {
     
     // 전송받은 유저이름 리스트에서 유저 이름 필터
     func filterUsers(with term : String){
-        guard hasFetched else {
+        guard let currentUserEmail = UserDefaults.standard.value(forKey: "email") as? String, hasFetched else {
             return
         }
         
+        let safeEmail = DatabaseManager.safeEmail(emailAddress: currentUserEmail)
+        
         self.spinner.dismiss()
         
-        let results : [[String: String]] = self.users.filter({
+        // 받아온 유저들의 정보에서 현재 유저와 이메일이 같지않은 이메일, 이름들을 search Result에 담음
+        let results : [SearchResult] = self.users.filter({
+            guard let email = $0["email"], email != safeEmail else{
+                return false
+            }
+            
             guard let name = $0["name"] else { return false}
             return name.hasPrefix(term.lowercased())
+        }).compactMap({
+            guard let email = $0["email"], let name = $0["name"] else {return nil}
+            
+            return SearchResult(name: name, email: email)
         })
         
         self.results = results
@@ -175,3 +191,8 @@ extension NewConversationViewController : UISearchBarDelegate {
     }
 }
 
+
+struct SearchResult {
+    let name : String
+    let email : String
+}

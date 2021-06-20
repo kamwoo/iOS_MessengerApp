@@ -45,6 +45,63 @@ final class StorageManager {
         })
     }
     
+    // 대화에서 사용된 이미지 저장소에 업로드
+    public func uploadMessagePhoto(with data: Data, fileName: String, completion: @escaping uploadPictureCompletion) {
+        
+        // firebase storage에 image디렉토리에 저장
+        storage.child("message_images/\(fileName)").putData(data, metadata: nil, completion: {[weak self] metadata, error in
+            
+            // 실패시 컴플리션에 error 담는다.
+            guard error == nil else {
+                print("StorageManager - uploadProfilePicture() fail to upload data to firebase for picture")
+                completion(.failure(StorageErrors.failedToUpload))
+                return
+            }
+            
+            // 저장소에 이미지 주소를 반환
+            self?.storage.child("message_images/\(fileName)").downloadURL(completion: {url, error in
+                guard let url = url else {
+                    print("StorageManager - uploadProfilePicture() fail to get download url")
+                    completion(.failure(StorageErrors.failToDownload))
+                    return
+                }
+                
+                // 성공시 이미지 다운로드 url을 completion으로 전달
+                let urlString = url.absoluteString
+                print("StorageManager - uploadProfilePicture() download url returned: \(urlString)")
+                completion(.success(urlString))
+            })
+        })
+    }
+    
+    public func uploadMessageVideo(with fileUrl: URL, fileName: String, completion: @escaping uploadPictureCompletion) {
+        
+        // firebase storage에 image디렉토리에 저장
+        storage.child("message_videos/\(fileName)").putFile(from: fileUrl, metadata: nil, completion: {[weak self] metadata, error in
+            
+            // 실패시 컴플리션에 error 담는다.
+            guard error == nil else {
+                print("StorageManager - uploadProfilePicture() fail to upload data to firebase for picture")
+                completion(.failure(StorageErrors.failedToUpload))
+                return
+            }
+            
+            // 저장소에 이미지 주소를 반환
+            self?.storage.child("message_videos/\(fileName)").downloadURL(completion: {url, error in
+                guard let url = url else {
+                    print("StorageManager - uploadProfilePicture() fail to get download url")
+                    completion(.failure(StorageErrors.failToDownload))
+                    return
+                }
+                
+                // 성공시 이미지 다운로드 url을 completion으로 전달
+                let urlString = url.absoluteString
+                print("StorageManager - uploadProfilePicture() download url returned: \(urlString)")
+                completion(.success(urlString))
+            })
+        })
+    }
+    
     // storage error문 지정
     public enum StorageErrors : Error {
         case failedToUpload
