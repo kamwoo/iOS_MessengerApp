@@ -140,13 +140,29 @@ class ConversationsViewController: UIViewController {
     // newConversation view가 완료되고 난 뒤 채팅 뷰로 전환
     private func createNewConversation(result : SearchResult){
         let name = result.name
-        let email = result.email
+        let email = DatabaseManager.safeEmail(emailAddress: result.email)
         
-        let vc = ChatViewController(with: email, id: nil)
-        vc.isNewConversation = true
-        vc.title = name
-        vc.navigationItem.largeTitleDisplayMode = .never
-        navigationController?.pushViewController(vc, animated: true)
+        // 대화방이 한쪽이 지우더라도 다른 한쪽이 나가지 않았는지 확인하고, 있으면 그 대화방을 재사용하고, 없으면 새로 생성
+        DatabaseManager.shared.conversationExists(with: email, completion: {[weak self] result in
+            guard let self = self else {return}
+            
+            switch result {
+            case .success(let conversationId):
+                let vc = ChatViewController(with: email, id: conversationId)
+                vc.isNewConversation = false
+                vc.title = name
+                vc.navigationItem.largeTitleDisplayMode = .never
+                self.navigationController?.pushViewController(vc, animated: true)
+                
+            case .failure(_):
+                let vc = ChatViewController(with: email, id: nil)
+                vc.isNewConversation = true
+                vc.title = name
+                vc.navigationItem.largeTitleDisplayMode = .never
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        })
+        
     }
     
     

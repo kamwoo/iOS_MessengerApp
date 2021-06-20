@@ -537,10 +537,7 @@ extension DatabaseManager {
                 
                 // 현재 유저의 대화 테이블 최신화
                 self.database.child("\(currentEmail)/conversations").observeSingleEvent(of: .value, with: { snapshot in
-                    guard var currentUserConversations = snapshot.value as? [[String:Any]] else {
-                        completion(false)
-                        return
-                    }
+                    var databaseEntryConversations = [[String:Any]]()
                     
                     // 유저 데이터에 latest_message필드에 새로 저장될 객체
                     let updateValue: [String: Any] = [
@@ -549,32 +546,55 @@ extension DatabaseManager {
                         "message": message
                     ]
                     
-                    var targetConversation : [String: Any]?
-                    var position = 0
-                    
-                    // 유저 데이터에 대화방 중에서 현재 대화방 아이디와 일치하는 바을 타겟 대화방으로 설정
-                    for conversationDictionary in currentUserConversations {
-                        if let currentId = conversationDictionary["id"] as? String, currentId == conversation{
-                            targetConversation = conversationDictionary
-                            break
+                    if var currentUserConversations = snapshot.value as? [[String:Any]]  {
+                        
+                        var targetConversation : [String: Any]?
+                        var position = 0
+                        
+                        // 유저 데이터에 대화방 중에서 현재 대화방 아이디와 일치하는 바을 타겟 대화방으로 설정
+                        for conversationDictionary in currentUserConversations {
+                            if let currentId = conversationDictionary["id"] as? String, currentId == conversation{
+                                targetConversation = conversationDictionary
+                                break
+                            }
+                            position += 1
                         }
-                        position += 1
+                        
+                        if var targetConversation = targetConversation {
+                            // 타겟 대화방에 최근 대화를 새로운 최근 대화 객체로 변환
+                            targetConversation["latest_message"] = updateValue
+                            // 현재 유저 대화방 데이터 중에 타겟 대화방에 해당하는 대화방을 새로운 대화방으로 전환
+                            currentUserConversations[position] = targetConversation
+                            databaseEntryConversations = currentUserConversations
+                        }else {
+                            let newConversationData : [String: Any] = [
+                                "id" : conversation,
+                                "other_user_email" : DatabaseManager.safeEmail(emailAddress: otherUserEmail),
+                                "name" : name, // 상대방 이름
+                                "latest_message" : updateValue
+                            ]
+                            currentUserConversations.append(newConversationData)
+                            databaseEntryConversations = currentUserConversations
+                        }
+                        
+                        
+                        
+                    }else {
+                        let newConversationData : [String: Any] = [
+                            "id" : conversation,
+                            "other_user_email" : DatabaseManager.safeEmail(emailAddress: otherUserEmail),
+                            "name" : name, // 상대방 이름
+                            "latest_message" : updateValue
+                        ]
+                        databaseEntryConversations = [
+                            newConversationData
+                        ]
                     }
                     
-                    // 타겟 대화방에 최근 대화를 새로운 최근 대화 객체로 변환
-                    targetConversation?["latest_message"] = updateValue
                     
-                    // 수정된 타겟 대화방 언래핑
-                    guard let finalConversation = targetConversation else {
-                        completion(false)
-                        return
-                    }
-                    
-                    // 현재 유저 대화방 데이터 중에 타겟 대화방에 해당하는 대화방을 새로운 대화방으로 전환
-                    currentUserConversations[position] = finalConversation
                     
                     // 현재 유저 Conversation필드에 수정된 값 대입
-                    self.database.child("\(currentEmail)/conversations").setValue(currentUserConversations){ error, _ in
+                    self.database.child("\(currentEmail)/conversations").setValue(databaseEntryConversations){ error, _ in
                         guard error == nil else {
                             completion(false)
                             return
@@ -582,10 +602,6 @@ extension DatabaseManager {
                         
                         // 상대방 대화방 데이터에도 같은 로직으로 새로운 최근 대화 최신화
                         self.database.child("\(otherUserEmail)/conversations").observeSingleEvent(of: .value, with: { snapshot in
-                            guard var otherUserConversations = snapshot.value as? [[String:Any]] else {
-                                completion(false)
-                                return
-                            }
                             
                             let updateValue: [String: Any] = [
                                 "date": dateString,
@@ -593,25 +609,58 @@ extension DatabaseManager {
                                 "message": message
                             ]
                             
-                            var targetConversation : [String: Any]?
-                            var position = 0
+                            var databaseEntryConversations = [[String:Any]]()
                             
-                            for conversationDictionary in otherUserConversations {
-                                if let currentId = conversationDictionary["id"] as? String, currentId == conversation{
-                                    targetConversation = conversationDictionary
-                                    break
-                                }
-                                position += 1
-                            }
-                            
-                            targetConversation?["latest_message"] = updateValue
-                            guard let finalConversation = targetConversation else {
-                                completion(false)
+                            guard let currentName = UserDefaults.standard.value(forKey: "name") as? String else{
                                 return
                             }
                             
-                            otherUserConversations[position] = finalConversation
-                            self.database.child("\(otherUserEmail)/conversations").setValue(otherUserConversations){ error, _ in
+                            if var otherUserConversations = snapshot.value as? [[String:Any]]  {
+                                var targetConversation : [String: Any]?
+                                var position = 0
+                                
+                                for conversationDictionary in otherUserConversations {
+                                    if let currentId = conversationDictionary["id"] as? String, currentId == conversation{
+                                        targetConversation = conversationDictionary
+                                        break
+                                    }
+                                    position += 1
+                                }
+                                
+                                if var targetConversation = targetConversation {
+                                    targetConversation["latest_message"] = updateValue
+                                    otherUserConversations[position] = targetConversation
+                                    databaseEntryConversations = otherUserConversations
+                                    
+                                }else {
+                                    let newConversationData : [String: Any] = [
+                                        "id" : conversation,
+                                        "other_user_email" : DatabaseManager.safeEmail(emailAddress: otherUserEmail),
+                                        "name" : currentName, // 상대방 이름
+                                        "latest_message" : updateValue
+                                    ]
+                                    otherUserConversations.append(newConversationData)
+                                    databaseEntryConversations = otherUserConversations
+                                }
+                                
+                                
+                            }else{
+                                let newConversationData : [String: Any] = [
+                                    "id" : conversation,
+                                    "other_user_email" : DatabaseManager.safeEmail(emailAddress: currentEmail),
+                                    "name" : currentName, // 상대방 이름
+                                    "latest_message" : updateValue
+                                ]
+                                databaseEntryConversations = [
+                                    newConversationData
+                                ]
+
+                            }
+                            
+                            
+                            
+                            
+                            self.database.child("\(otherUserEmail)/conversations").setValue(databaseEntryConversations){ error, _ in
                                 guard error == nil else {
                                     completion(false)
                                     return
@@ -665,6 +714,31 @@ extension DatabaseManager {
             return
         }
         let safeSenderEmail = DatabaseManager.safeEmail(emailAddress: senderEmail)
+        
+        database.child("\(safeRecipientEmail)/conversations").observeSingleEvent(of: .value, with: { snapshot in
+            guard let collection = snapshot.value as? [[String: Any]] else {
+                completion(.failure(DatabaseError.failedError))
+                return
+            }
+            
+            if let conversation = collection.first(where: {
+                guard let targetSenderEmail = $0["other_user_email"] as? String else {
+                    return false
+                }
+                return safeSenderEmail == targetSenderEmail
+            }){
+                guard let id = conversation["id"] as? String else {
+                    completion(.failure(DatabaseError.failedError))
+                    return
+                }
+                
+                completion(.success(id))
+                return
+            }
+            
+            completion(.failure(DatabaseError.failedError))
+            return
+        })
     }
 }
 
