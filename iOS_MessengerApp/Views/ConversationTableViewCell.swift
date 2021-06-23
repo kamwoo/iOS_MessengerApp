@@ -69,10 +69,10 @@ class ConversationTableViewCell: UITableViewCell {
     
     // id, name, 상대 이메일, 최근 메세지를 담은 Conversation 객체로 각 셀을 설정
     public func configure(with model : Conversation){
-        self.userMessageeLabel.text = model.latestMessage.text
-        self.userNameLabel.text = model.name
+        userMessageeLabel.text = model.latestMessage.text
+        userNameLabel.text = model.name
         
-        // 저장소에 있는 상대 유저 이미지 리턴
+        // 저장소에 있는 상대 유저 이미지 리턴 후 설정
         let path = "images/\(model.otherUserEmail)_profile_picture.png"
         StorageManager.shared.downloadUrl(for: path, completion: { [weak self] result in
             switch result{

@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseDatabase
 import MessageKit
+import CoreLocation
 
 final class DatabaseManager {
     static let shared = DatabaseManager()
@@ -28,6 +29,9 @@ final class DatabaseManager {
 extension DatabaseManager {
     
     /// 유저가 이미 있는지 확인
+    /// Prameters
+    ///  - `email` :  확인할 타겟 이메일
+    ///  - `completion` :  존재 여부에 따른 bool값을 받은 async closure
     public func userExists(with email: String, completion: @escaping( (Bool) -> Void) ){
         // 이메일의 기호 변경 안정성 문제
         var safeEmail = email.replacingOccurrences(of: ".", with: "-")
@@ -51,7 +55,9 @@ extension DatabaseManager {
         database.child(user.safeEmail).setValue([
             "first_name" : user.firstName,
             "seconde_name" : user.secondName
-        ], withCompletionBlock: { error, _ in
+        ], withCompletionBlock: { [weak self] error, _ in
+            guard let self = self else {return}
+            
             guard error == nil else {
                 print(" DatabaseManager - insertUser() fail to write to database")
                 completion(false)
@@ -109,6 +115,13 @@ extension DatabaseManager {
     
     public enum DatabaseError : Error {
         case failedError
+        
+        public var localizedDescription : String {
+            switch self {
+            case .failedError:
+                return "failed"
+            }
+        }
     }
     
 
@@ -205,7 +218,18 @@ extension DatabaseManager {
                     }
                     let media = Media(url: url, image: nil, placeholderImage: placeholder, size: CGSize(width: 300, height:300))
                     kind = .video(media)
-            
+                    
+                }else if type == "location" {
+                    let locationComponents = content.components(separatedBy: ",")
+                    guard let longitude = Double(locationComponents[0]),
+                          let latitude = Double(locationComponents[1]) else {
+                            return nil
+                    }
+                    
+                    let location = Location(location: CLLocation(latitude: latitude, longitude: longitude),
+                                            size: CGSize(width: 300, height:300))
+                    kind = .location(location)
+                    
                 }else {
                     kind = .text(content)
                 }
@@ -491,7 +515,9 @@ extension DatabaseManager {
                     message = targetUrlString
                 }
                 break
-            case .location(_):
+            case .location(let location):
+                let location = location.location
+                message = "\(location.coordinate.longitude),\(location.coordinate.latitude)"
                 break
             case .emoji(_):
                 break
@@ -546,6 +572,7 @@ extension DatabaseManager {
                         "message": message
                     ]
                     
+                    // 현재 유저의 데이터 베이스에 대화방이 있다면 최근 대화 업데이트
                     if var currentUserConversations = snapshot.value as? [[String:Any]]  {
                         
                         var targetConversation : [String: Any]?
@@ -577,8 +604,7 @@ extension DatabaseManager {
                             databaseEntryConversations = currentUserConversations
                         }
                         
-                        
-                        
+                    // 현재 유저의 데이터베이스에 대화방이 없다면
                     }else {
                         let newConversationData : [String: Any] = [
                             "id" : conversation,
@@ -593,7 +619,7 @@ extension DatabaseManager {
                     
                     
                     
-                    // 현재 유저 Conversation필드에 수정된 값 대입
+                    // 현재 유저 Conversation필드에 수정된 값(databaseEntryConversations) 대입
                     self.database.child("\(currentEmail)/conversations").setValue(databaseEntryConversations){ error, _ in
                         guard error == nil else {
                             completion(false)
@@ -615,6 +641,7 @@ extension DatabaseManager {
                                 return
                             }
                             
+                            // 현재 유저의 데이터 베이스에 대화방이 있다면 최근 대화 업데이트
                             if var otherUserConversations = snapshot.value as? [[String:Any]]  {
                                 var targetConversation : [String: Any]?
                                 var position = 0
@@ -627,6 +654,7 @@ extension DatabaseManager {
                                     position += 1
                                 }
                                 
+                                // conversations필드에 최금 대화 업데이트
                                 if var targetConversation = targetConversation {
                                     targetConversation["latest_message"] = updateValue
                                     otherUserConversations[position] = targetConversation
@@ -643,7 +671,7 @@ extension DatabaseManager {
                                     databaseEntryConversations = otherUserConversations
                                 }
                                 
-                                
+                            // 현재 유저의 데이터베이스에 대화방이 없다면
                             }else{
                                 let newConversationData : [String: Any] = [
                                     "id" : conversation,
@@ -656,8 +684,6 @@ extension DatabaseManager {
                                 ]
 
                             }
-                            
-                            
                             
                             
                             self.database.child("\(otherUserEmail)/conversations").setValue(databaseEntryConversations){ error, _ in
@@ -675,6 +701,7 @@ extension DatabaseManager {
         })
     }
     
+    // 대화방 지우기
     public func deleteConversation(conversationId : String, completion: @escaping (Bool) -> Void){
         guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
             return
@@ -708,19 +735,24 @@ extension DatabaseManager {
         })
     }
     
+    
+    // 대화방을 지우더라도 다른 유저가 대화방을 나가지 않았다면 그 대화방 데이터로 대화방 생성
     public func conversationExists(with targetRecipientEmail: String, completion: @escaping (Result<String, Error>) -> Void){
+        // 상대방 이메일
         let safeRecipientEmail = DatabaseManager.safeEmail(emailAddress: targetRecipientEmail)
+        // 현재 유저 이메일
         guard let senderEmail = UserDefaults.standard.value(forKey: "email") as? String else {
             return
         }
         let safeSenderEmail = DatabaseManager.safeEmail(emailAddress: senderEmail)
         
+        // 상대방 이메일 대화방 데이터에서
         database.child("\(safeRecipientEmail)/conversations").observeSingleEvent(of: .value, with: { snapshot in
             guard let collection = snapshot.value as? [[String: Any]] else {
                 completion(.failure(DatabaseError.failedError))
                 return
             }
-            
+            // 상대방 이메일과 유저 이미지가 일치하는 대화방 id를 반환
             if let conversation = collection.first(where: {
                 guard let targetSenderEmail = $0["other_user_email"] as? String else {
                     return false
@@ -744,20 +776,6 @@ extension DatabaseManager {
 
 
 
-// MARK: - user Model
-// 유저 정보 model
-struct ChatAppUser {
-    let firstName : String
-    let secondName : String
-    let emailAddress : String
-    var safeEmail : String {
-        var safeEmail = emailAddress.replacingOccurrences(of: ".", with: "-")
-        safeEmail = safeEmail.replacingOccurrences(of: "@", with: "-")
-        return safeEmail
-    }
-    var profilePictureFileName : String {
-        return "\(safeEmail)_profile_picture.png"
-    }
-}
+
 
 

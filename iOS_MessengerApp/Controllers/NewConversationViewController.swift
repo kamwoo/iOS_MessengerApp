@@ -10,7 +10,7 @@ import JGProgressHUD
 
 // 새로운 대화만들기 뷰
 
-class NewConversationViewController: UIViewController {
+final class NewConversationViewController: UIViewController {
     // 
     public var completion : ((SearchResult) -> Void)?
     
@@ -49,7 +49,7 @@ class NewConversationViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.addSubview(noResultsLabel)
         view.addSubview(tableView)
         
@@ -124,7 +124,7 @@ extension NewConversationViewController : UISearchBarDelegate {
         
         spinner.show(in: view)
         
-        self.searchUsers(query: text)
+        searchUsers(query: text)
         
     }
     
@@ -155,10 +155,10 @@ extension NewConversationViewController : UISearchBarDelegate {
         
         let safeEmail = DatabaseManager.safeEmail(emailAddress: currentUserEmail)
         
-        self.spinner.dismiss()
+        spinner.dismiss()
         
         // 받아온 유저들의 정보에서 현재 유저와 이메일이 같지않은 이메일, 이름들을 search Result에 담음
-        let results : [SearchResult] = self.users.filter({
+        let results : [SearchResult] = users.filter({
             guard let email = $0["email"], email != safeEmail else{
                 return false
             }
@@ -191,8 +191,3 @@ extension NewConversationViewController : UISearchBarDelegate {
     }
 }
 
-
-struct SearchResult {
-    let name : String
-    let email : String
-}

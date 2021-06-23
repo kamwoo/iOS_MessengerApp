@@ -9,22 +9,9 @@ import UIKit
 import FirebaseAuth
 import JGProgressHUD
 
-// 대화 세부 정보
-struct Conversation {
-    let id: String
-    let name: String
-    let otherUserEmail: String
-    let latestMessage: LatestMessage
-}
 
-// 가장 최근 메세지
-struct LatestMessage {
-    let date: String
-    let text: String
-    let isRead: Bool
-}
 
-class ConversationsViewController: UIViewController {
+final class ConversationsViewController: UIViewController {
     
     // MARK: -views
     // 로딩 뷰어 선언
@@ -64,7 +51,6 @@ class ConversationsViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(noConversationsLabel)
         setupTableView()
-        fetchConversations()
         startListeningForConversations()
         
         loginObserver = NotificationCenter.default.addObserver(forName: .didLogInNotification,
@@ -96,6 +82,7 @@ class ConversationsViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         tableView.frame = view.bounds
+        noConversationsLabel.frame = CGRect(x: 10, y: (view.height-100)/2, width: view.width-20, height: 100)
     }
     
     // 현재 로그인 상태인지 체크하고, 로그아웃 상태라면 로그인 페이지로 전환
@@ -166,10 +153,6 @@ class ConversationsViewController: UIViewController {
     }
     
     
-    private func fetchConversations() {
-        tableView.isHidden = false
-    }
-    
     // 현재 유저의 데이터베이스에 저장된 대화들을 리턴받아 conversatoins에 저장
     private func startListeningForConversations() {
         guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
@@ -186,8 +169,12 @@ class ConversationsViewController: UIViewController {
             switch result {
             case .success(let conversations):
                 guard !conversations.isEmpty else {
+                    self?.tableView.isHidden = true
+                    self?.noConversationsLabel.isHidden = false
                     return
                 }
+                self?.tableView.isHidden = false
+                self?.noConversationsLabel.isHidden = true
                 self?.conversations = conversations
                 
                 DispatchQueue.main.async {
@@ -195,6 +182,8 @@ class ConversationsViewController: UIViewController {
                 }
                 
             case .failure(let error):
+                self?.tableView.isHidden = true
+                self?.noConversationsLabel.isHidden = false
                 print("failed to get convo : \(error)")
             }
         })
@@ -248,17 +237,17 @@ extension ConversationsViewController : UITableViewDelegate, UITableViewDataSour
         if editingStyle == .delete {
             let conversationId = conversations[indexPath.row].id
             tableView.beginUpdates()
+            self.conversations.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .left)
             
-            DatabaseManager.shared.deleteConversation(conversationId: conversationId , completion: {[weak self] success in
-                if success {
-                    self?.conversations.remove(at: indexPath.row)
-                    tableView.deleteRows(at: [indexPath], with: .left)
+            DatabaseManager.shared.deleteConversation(conversationId: conversationId , completion: { success in
+                if !success {
+                    print("failed to remove conversation")
                 }
                 
             })
             
-            
-            
+
             tableView.endUpdates()
         }
     }

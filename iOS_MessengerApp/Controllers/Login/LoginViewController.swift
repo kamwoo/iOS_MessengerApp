@@ -40,7 +40,7 @@ class LoginViewController: UIViewController {
         textfield.placeholder = "Write your email"
         textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
-        textfield.backgroundColor = .white
+        textfield.backgroundColor = .secondarySystemBackground
         return textfield
     }()
     
@@ -56,7 +56,7 @@ class LoginViewController: UIViewController {
         textfield.placeholder = "Write your password"
         textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
-        textfield.backgroundColor = .white
+        textfield.backgroundColor = .secondarySystemBackground
         textfield.isSecureTextEntry = true
         return textfield
     }()
@@ -83,17 +83,17 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Login"
-        view.backgroundColor = .white
+        title = "Login"
+        view.backgroundColor = .systemBackground
         
         // 오른쪽 탭바 버튼 -> 가입화면
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register",
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register",
                                                                  style: .done,
                                                                  target: self,
                                                                  action: #selector(didTapRegister))
         
         // 로그인 버튼 액션 추가
-        self.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         
         emailField.delegate = self
         passwordField.delegate = self

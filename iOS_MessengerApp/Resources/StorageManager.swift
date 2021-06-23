@@ -20,7 +20,8 @@ final class StorageManager {
     public func uploadProfilePicture(with data: Data, fileName: String, completion: @escaping uploadPictureCompletion) {
         
         // firebase storage에 image디렉토리에 저장
-        storage.child("images/\(fileName)").putData(data, metadata: nil, completion: { metadata, error in
+        storage.child("images/\(fileName)").putData(data, metadata: nil, completion: {[weak self] metadata, error in
+            guard let self = self else {return}
             
             // 실패시 컴플리션에 error 담는다.
             guard error == nil else {
@@ -74,9 +75,10 @@ final class StorageManager {
         })
     }
     
+    // 비디오 url을 저장소에 업로드
     public func uploadMessageVideo(with fileUrl: URL, fileName: String, completion: @escaping uploadPictureCompletion) {
         
-        // firebase storage에 image디렉토리에 저장
+        // firebase storage에 비디오 디렉토리에 저장
         storage.child("message_videos/\(fileName)").putFile(from: fileUrl, metadata: nil, completion: {[weak self] metadata, error in
             
             // 실패시 컴플리션에 error 담는다.
@@ -86,7 +88,7 @@ final class StorageManager {
                 return
             }
             
-            // 저장소에 이미지 주소를 반환
+            // 저장소에 비디오 주소를 반환
             self?.storage.child("message_videos/\(fileName)").downloadURL(completion: {url, error in
                 guard let url = url else {
                     print("StorageManager - uploadProfilePicture() fail to get download url")
@@ -94,7 +96,7 @@ final class StorageManager {
                     return
                 }
                 
-                // 성공시 이미지 다운로드 url을 completion으로 전달
+                // 성공시 비디오 다운로드 url을 completion으로 전달
                 let urlString = url.absoluteString
                 print("StorageManager - uploadProfilePicture() download url returned: \(urlString)")
                 completion(.success(urlString))

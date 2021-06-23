@@ -9,11 +9,16 @@
 /* Begin PBXBuildFile section */
 		F6756553267DB0570028283D /* ConversationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6756552267DB0570028283D /* ConversationTableViewCell.swift */; };
 		F6756555267F38980028283D /* NewConversationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6756554267F38980028283D /* NewConversationCell.swift */; };
+		F6756557267F9ED10028283D /* LocationPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6756556267F9ED10028283D /* LocationPickerViewController.swift */; };
+		F675655A2683265A0028283D /* ConversationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67565592683265A0028283D /* ConversationModels.swift */; };
+		F675655C268326A60028283D /* ChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F675655B268326A60028283D /* ChatModels.swift */; };
+		F675655E2683270A0028283D /* SearchResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F675655D2683270A0028283D /* SearchResultModel.swift */; };
+		F6756560268327780028283D /* ProfileViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F675655F268327780028283D /* ProfileViewModels.swift */; };
+		F67565622683289F0028283D /* UserModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67565612683289F0028283D /* UserModels.swift */; };
 		F6A3C125267656120019B1F4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F6A3C124267656120019B1F4 /* GoogleService-Info.plist */; };
 		F6A3CEC426760DBB008C7A43 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CEC326760DBB008C7A43 /* LoginViewController.swift */; };
 		F6A3CEC626760DCC008C7A43 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CEC526760DCC008C7A43 /* RegisterViewController.swift */; };
 		F6A3CEC826760DF6008C7A43 /* PhotoViewerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CEC726760DF6008C7A43 /* PhotoViewerViewController.swift */; };
-		F6A3CECA26760E04008C7A43 /* VideoPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CEC926760E04008C7A43 /* VideoPlayerViewController.swift */; };
 		F6A3CECC26760E3C008C7A43 /* NewConversationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CECB26760E3C008C7A43 /* NewConversationViewController.swift */; };
 		F6A3CECE26760E55008C7A43 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CECD26760E55008C7A43 /* ProfileViewController.swift */; };
 		F6A3CED1267616AA008C7A43 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CED0267616AA008C7A43 /* Extensions.swift */; };
@@ -35,11 +40,16 @@
 		EF4533DEE6B23F7B8BD4CDBF /* Pods-iOS_MessengerApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_MessengerApp.release.xcconfig"; path = "Target Support Files/Pods-iOS_MessengerApp/Pods-iOS_MessengerApp.release.xcconfig"; sourceTree = "<group>"; };
 		F6756552267DB0570028283D /* ConversationTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationTableViewCell.swift; sourceTree = "<group>"; };
 		F6756554267F38980028283D /* NewConversationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationCell.swift; sourceTree = "<group>"; };
+		F6756556267F9ED10028283D /* LocationPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerViewController.swift; sourceTree = "<group>"; };
+		F67565592683265A0028283D /* ConversationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationModels.swift; sourceTree = "<group>"; };
+		F675655B268326A60028283D /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModels.swift; sourceTree = "<group>"; };
+		F675655D2683270A0028283D /* SearchResultModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultModel.swift; sourceTree = "<group>"; };
+		F675655F268327780028283D /* ProfileViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModels.swift; sourceTree = "<group>"; };
+		F67565612683289F0028283D /* UserModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModels.swift; sourceTree = "<group>"; };
 		F6A3C124267656120019B1F4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F6A3CEC326760DBB008C7A43 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		F6A3CEC526760DCC008C7A43 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 		F6A3CEC726760DF6008C7A43 /* PhotoViewerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoViewerViewController.swift; sourceTree = "<group>"; };
-		F6A3CEC926760E04008C7A43 /* VideoPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewController.swift; sourceTree = "<group>"; };
 		F6A3CECB26760E3C008C7A43 /* NewConversationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationViewController.swift; sourceTree = "<group>"; };
 		F6A3CECD26760E55008C7A43 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		F6A3CED0267616AA008C7A43 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -103,10 +113,10 @@
 				F6A54E5B2675DBC30011A782 /* ConversationsViewController.swift */,
 				F6A3CECF26760F48008C7A43 /* Login */,
 				F6A3CEC726760DF6008C7A43 /* PhotoViewerViewController.swift */,
-				F6A3CEC926760E04008C7A43 /* VideoPlayerViewController.swift */,
 				F6A3CECB26760E3C008C7A43 /* NewConversationViewController.swift */,
 				F6A3CECD26760E55008C7A43 /* ProfileViewController.swift */,
 				F6E7039C2677880C00EC1637 /* ChatViewController.swift */,
+				F6756556267F9ED10028283D /* LocationPickerViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -114,6 +124,7 @@
 		F6A3CEBF26760C8F008C7A43 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				F675655F268327780028283D /* ProfileViewModels.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -132,6 +143,10 @@
 		F6A3CEC126760CA3008C7A43 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				F67565592683265A0028283D /* ConversationModels.swift */,
+				F675655B268326A60028283D /* ChatModels.swift */,
+				F675655D2683270A0028283D /* SearchResultModel.swift */,
+				F67565612683289F0028283D /* UserModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -198,6 +213,7 @@
 				F6A54E512675DBC30011A782 /* Frameworks */,
 				F6A54E522675DBC30011A782 /* Resources */,
 				8BD0329D04D11F4EC5B7A5E3 /* [CP] Embed Pods Frameworks */,
+				F6756558268302DC0028283D /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -294,6 +310,23 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		F6756558268302DC0028283D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -304,18 +337,23 @@
 				F6A3CEC426760DBB008C7A43 /* LoginViewController.swift in Sources */,
 				F6756555267F38980028283D /* NewConversationCell.swift in Sources */,
 				F6C3503F267707420010601C /* DatabaseManager.swift in Sources */,
+				F675655C268326A60028283D /* ChatModels.swift in Sources */,
 				F6A3CEC626760DCC008C7A43 /* RegisterViewController.swift in Sources */,
 				F6A3CECC26760E3C008C7A43 /* NewConversationViewController.swift in Sources */,
+				F67565622683289F0028283D /* UserModels.swift in Sources */,
 				F6A54E5C2675DBC30011A782 /* ConversationsViewController.swift in Sources */,
-				F6A3CECA26760E04008C7A43 /* VideoPlayerViewController.swift in Sources */,
 				F6A3CED1267616AA008C7A43 /* Extensions.swift in Sources */,
 				F6A54E582675DBC30011A782 /* AppDelegate.swift in Sources */,
 				F6A3CECE26760E55008C7A43 /* ProfileViewController.swift in Sources */,
 				F6A54E5A2675DBC30011A782 /* SceneDelegate.swift in Sources */,
 				F6756553267DB0570028283D /* ConversationTableViewCell.swift in Sources */,
 				F6E7039D2677880C00EC1637 /* ChatViewController.swift in Sources */,
+				F675655A2683265A0028283D /* ConversationModels.swift in Sources */,
+				F6756560268327780028283D /* ProfileViewModels.swift in Sources */,
+				F675655E2683270A0028283D /* SearchResultModel.swift in Sources */,
 				F6A3CEC826760DF6008C7A43 /* PhotoViewerViewController.swift in Sources */,
 				F6AA53ED2677AB1F0004D108 /* StorageManager.swift in Sources */,
+				F6756557267F9ED10028283D /* LocationPickerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

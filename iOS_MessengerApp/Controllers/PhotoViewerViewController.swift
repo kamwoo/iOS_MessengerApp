@@ -8,10 +8,11 @@
 import UIKit
 import SDWebImage
 
-class PhotoViewerViewController: UIViewController {
+final class PhotoViewerViewController: UIViewController {
     
     private let url : URL
     
+    // 이미지 url
     init(with url: URL){
         self.url = url
         super.init(nibName: nil, bundle: nil)
@@ -21,21 +22,23 @@ class PhotoViewerViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 이미지 뷰 생성
     private let imageView : UIImageView = {
        let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
-        self.title = "Photo"
+        title = "Photo"
         navigationItem.largeTitleDisplayMode = .never
         view.addSubview(imageView)
-        imageView.sd_setImage(with: self.url, completed: nil)
+        imageView.sd_setImage(with: url, completed: nil)
     }
     
+    // 이미지뷰를 화면에 채움
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         imageView.frame = view.bounds

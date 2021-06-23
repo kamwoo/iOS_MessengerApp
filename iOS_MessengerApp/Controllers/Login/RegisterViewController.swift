@@ -9,7 +9,7 @@ import UIKit
 import FirebaseAuth
 import JGProgressHUD
 
-class RegisterViewController: UIViewController {
+final class RegisterViewController: UIViewController {
     
     private let spinner = JGProgressHUD(style: .dark)
     
@@ -44,7 +44,7 @@ class RegisterViewController: UIViewController {
         textfield.placeholder = "Write your email"
         textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
-        textfield.backgroundColor = .white
+        textfield.backgroundColor = .secondarySystemBackground
         return textfield
     }()
     
@@ -60,7 +60,7 @@ class RegisterViewController: UIViewController {
         textfield.placeholder = "Write your first name"
         textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
-        textfield.backgroundColor = .white
+        textfield.backgroundColor = .secondarySystemBackground
         return textfield
     }()
     
@@ -76,7 +76,7 @@ class RegisterViewController: UIViewController {
         textfield.placeholder = "Write your second name"
         textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
-        textfield.backgroundColor = .white
+        textfield.backgroundColor = .secondarySystemBackground
         return textfield
     }()
     
@@ -92,7 +92,7 @@ class RegisterViewController: UIViewController {
         textfield.placeholder = "Write your password"
         textfield.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         textfield.leftViewMode = .always
-        textfield.backgroundColor = .white
+        textfield.backgroundColor = .secondarySystemBackground
         textfield.isSecureTextEntry = true
         return textfield
     }()
@@ -113,10 +113,10 @@ class RegisterViewController: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Login"
+        title = "Login"
         view.backgroundColor = .white
         
-        self.registerButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
+        registerButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
         
         emailField.delegate = self
         passwordField.delegate = self
@@ -240,12 +240,16 @@ class RegisterViewController: UIViewController {
                     return
                 }
                 
+                UserDefaults.standard.setValue(email, forKey: "email")
+                UserDefaults.standard.setValue("\(firstName)\(secondName)", forKey: "name")
+                
                 // 가입 유저 정보
                 let chatUser = ChatAppUser(firstName: firstName,
                                            secondName: secondName,
                                            emailAddress: email)
                 // realtiem database에 저장
-                DatabaseManager.shared.insertUser(with: chatUser, completion: { success in
+                DatabaseManager.shared.insertUser(with: chatUser, completion: { [weak self] success in
+                    guard let self = self else {return}
                     if success {
                         //upload image
                         guard let image = self.imageView.image,
@@ -357,7 +361,7 @@ extension RegisterViewController : UIImagePickerControllerDelegate, UINavigation
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true, completion: nil)
         guard let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage else {return}
-        self.imageView.image = selectedImage
+        imageView.image = selectedImage
     }
     
     // 완료되고 종료될때

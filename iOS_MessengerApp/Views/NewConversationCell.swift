@@ -55,7 +55,7 @@ class NewConversationCell: UITableViewCell {
     
     // id, name, 상대 이메일, 최근 메세지를 담은 Conversation 객체로 각 셀을 설정
     public func configure(with model : SearchResult){
-        self.userNameLabel.text = model.name
+        userNameLabel.text = model.name
         
         // 저장소에 있는 상대 유저 이미지 리턴
         let path = "images/\(model.email)_profile_picture.png"
