@@ -15,6 +15,7 @@
 		F675655E2683270A0028283D /* SearchResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F675655D2683270A0028283D /* SearchResultModel.swift */; };
 		F6756560268327780028283D /* ProfileViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F675655F268327780028283D /* ProfileViewModels.swift */; };
 		F67565622683289F0028283D /* UserModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67565612683289F0028283D /* UserModels.swift */; };
+		F6756564268347620028283D /* Readme.md in Resources */ = {isa = PBXBuildFile; fileRef = F6756563268347620028283D /* Readme.md */; };
 		F6A3C125267656120019B1F4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F6A3C124267656120019B1F4 /* GoogleService-Info.plist */; };
 		F6A3CEC426760DBB008C7A43 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CEC326760DBB008C7A43 /* LoginViewController.swift */; };
 		F6A3CEC626760DCC008C7A43 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A3CEC526760DCC008C7A43 /* RegisterViewController.swift */; };
@@ -46,6 +47,7 @@
 		F675655D2683270A0028283D /* SearchResultModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultModel.swift; sourceTree = "<group>"; };
 		F675655F268327780028283D /* ProfileViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModels.swift; sourceTree = "<group>"; };
 		F67565612683289F0028283D /* UserModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModels.swift; sourceTree = "<group>"; };
+		F6756563268347620028283D /* Readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
 		F6A3C124267656120019B1F4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F6A3CEC326760DBB008C7A43 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		F6A3CEC526760DCC008C7A43 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
@@ -172,6 +174,7 @@
 		F6A54E4B2675DBC30011A782 = {
 			isa = PBXGroup;
 			children = (
+				F6756563268347620028283D /* Readme.md */,
 				F6A54E562675DBC30011A782 /* iOS_MessengerApp */,
 				F6A54E552675DBC30011A782 /* Products */,
 				940E6020EA0A549AA8933041 /* Pods */,
@@ -261,6 +264,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6756564268347620028283D /* Readme.md in Resources */,
 				F6A54E642675DBC40011A782 /* LaunchScreen.storyboard in Resources */,
 				F6A3C125267656120019B1F4 /* GoogleService-Info.plist in Resources */,
 				F6A54E612675DBC40011A782 /* Assets.xcassets in Resources */,
